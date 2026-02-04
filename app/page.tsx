@@ -263,7 +263,7 @@ export default function Home() {
   // Show 404 page if invalid token
   if (show404) {
     return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4 relative">
         <div className="flex flex-col items-center justify-center gap-6 text-center">
           <div className="text-8xl">💔</div>
           <h1 className="text-6xl font-bold text-[#b91c1c]">404</h1>
@@ -278,25 +278,63 @@ export default function Home() {
             Назад към главната страница
           </a>
         </div>
+        <footer className="absolute bottom-4 left-0 right-0 text-center text-[#b91c1c] text-sm">
+          <span>❤️ </span>
+          <a 
+            href="https://hmwspro.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:underline"
+            title="HM WSPro"
+          >
+            HM WSPro
+          </a>
+          <span> ❤️</span>
+        </footer>
       </div>
     );
   }
 
   if (state.accepted) {
     return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4 relative">
         <div className="flex flex-col items-center justify-center gap-6 text-center">
           <div className="text-8xl animate-bounce">❤️</div>
           <div className="w-64 h-64 bg-contain bg-center bg-no-repeat">
             <img
-              src="https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif"
-              alt="Happy GIF"
+              src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmM5bmxydzVmcjA4dmt1OWdqbjRsZW5jYXRiOHVnbzhmdm9tcGwzdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Bv76prPEWdr4nxovaK/giphy.gif"
+              alt="Mickey and Minnie Mouse Kissing"
               className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fallback to another Mickey and Minnie GIF
+                const target = e.target as HTMLImageElement;
+                if (target.src.includes('xT9IgG50Fb7Mi0prBC')) {
+                  target.src = 'https://media.giphy.com/media/3o7aD2sa0sYxJYq1xu/giphy.gif';
+                } else if (target.src.includes('3o7aD2sa0sYxJYq1xu')) {
+                  target.src = 'https://media.giphy.com/media/l0MYC0LajVPo6DRi0/giphy.gif';
+                } else {
+                  // Final fallback to a happy celebration GIF
+                  target.src = 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif';
+                }
+              }}
             />
           </div>
           <h2 className="text-4xl font-bold text-[#b91c1c]">Йей! Знаех си! ❤️</h2>
           <p className="text-3xl font-bold text-[#b91c1c]">Обичам те!</p>
         </div>
+        <footer className="absolute bottom-4 left-0 right-0 text-center text-[#b91c1c] text-sm">
+          <span>❤️ </span>
+          <a 
+            href="https://hmwspro.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:underline"
+            title="HM WSPro"
+          >
+            hmwspro.com
+          </a>
+          <span> ❤️</span>
+        </footer>
       </div>
     );
   }
@@ -358,12 +396,26 @@ export default function Home() {
           
           <button
             onClick={handleNoClick}
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all duration-200 text-lg sm:text-xl flex-1 sm:flex-initial"
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all duration-200 text-lg sm:text-xl flex-1 sm:flex-initial text-right"
           >
             {getNoButtonText()}
           </button>
         </div>
       </div>
+      
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-[#b91c1c] text-sm z-10">
+        <span>❤️ </span>
+        <a 
+          href="https://hmwspro.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="hover:underline"
+          title="HM WSPro"
+        >
+          HM WSPro
+        </a>
+        <span> ❤️</span>
+      </footer>
     </div>
   );
 }
