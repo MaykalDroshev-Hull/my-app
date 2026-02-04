@@ -111,36 +111,9 @@ const getNameFromURL = (): string | null => {
 };
 
 export default function Home() {
-  const [name, setName] = useState<string>(() => {
-    // Try to read name immediately on client-side
-    if (typeof window !== 'undefined') {
-      try {
-        const urlName = getNameFromURL();
-        return urlName || '';
-      } catch {
-        // Invalid token - will show 404
-        return '';
-      }
-    }
-    return '';
-  });
-  const [show404, setShow404] = useState<boolean>(() => {
-    // Check if we should show 404 on initial load
-    if (typeof window !== 'undefined') {
-      const hasName = hasNameParameter();
-      if (!hasName) {
-        return true; // No name parameter - show 404
-      }
-      // Has name parameter - check if valid
-      try {
-        getNameFromURL();
-        return false; // Valid token
-      } catch {
-        return true; // Invalid token - show 404
-      }
-    }
-    return true; // Show 404 by default until we check
-  });
+  const [name, setName] = useState<string>('');
+  const [show404, setShow404] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingName, setIsLoadingName] = useState<boolean>(true);
   const [state, setState] = useState<AppState>({
     accepted: false,
@@ -151,7 +124,7 @@ export default function Home() {
   const heartIdRef = useRef(0);
 
   useEffect(() => {
-    // Check for 404 condition and validate name
+    // Validate and load page content
     if (typeof window !== 'undefined') {
       const hasName = hasNameParameter();
       
@@ -162,24 +135,35 @@ export default function Home() {
             setName(urlName);
           }
           setShow404(false);
+          // Brief loading animation for visual feedback
+          const timer = setTimeout(() => {
+            setIsLoading(false);
+            setIsLoadingName(false);
+          }, 500);
+          return () => clearTimeout(timer);
         } catch {
           // Invalid token - show 404
-          setShow404(true);
-          setIsLoadingName(false);
-          return;
+          const timer = setTimeout(() => {
+            setShow404(true);
+            setIsLoading(false);
+          }, 500);
+          return () => clearTimeout(timer);
         }
       } else {
         // No name parameter - show 404 (block empty index page)
-        setShow404(true);
-        setIsLoadingName(false);
-        return;
+        const timer = setTimeout(() => {
+          setShow404(true);
+          setIsLoading(false);
+        }, 500);
+        return () => clearTimeout(timer);
       }
     }
     
-    // Brief loading animation for visual feedback
+    // Fallback for SSR
     const timer = setTimeout(() => {
+      setIsLoading(false);
       setIsLoadingName(false);
-    }, 400);
+    }, 500);
     return () => clearTimeout(timer);
 
     // Create floating hearts
@@ -259,6 +243,20 @@ export default function Home() {
     const index = Math.min(state.noButtonClicks, NO_BUTTON_TEXTS.length - 1);
     return NO_BUTTON_TEXTS[index];
   };
+
+  // Show loading animation while validating
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4">
+        <div className="flex flex-col items-center justify-center gap-6 text-center">
+          <div className="text-8xl animate-bounce">❤️</div>
+          <div className="text-2xl font-bold text-[#b91c1c] animate-pulse">
+            Зареждане...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show 404 page if invalid token
   if (show404) {
