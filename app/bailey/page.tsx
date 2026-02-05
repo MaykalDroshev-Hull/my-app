@@ -20,101 +20,27 @@ interface Heart {
 }
 
 const NO_BUTTON_TEXTS = [
-  'Не',
-  'Ама наистина ли?',
-  'Помисли пак! 💔',
-  'Ще плача...',
-  'Последен шанс!',
-  'Моля те! 🥺',
-  'Не може да бъде!',
-  'Ще ми е много тъжно...',
-  'Помисли още малко!',
-  'Не ме отказвай! 💔',
-  'Ще се разстроя много...',
-  'Моля, помисли отново!',
-  'Недей да отказваш!',
-  'Ще ми счупиш сърцето...',
-  'Последна молба! 🙏',
+  'No',
+  'Are you sure?',
+  'Think again! 💔',
+  'I\'ll cry...',
+  'Last chance!',
+  'Please! 🥺',
+  'It can\'t be!',
+  'I\'ll be very sad...',
+  'Think a bit more!',
+  'Don\'t reject me! 💔',
+  'I\'ll be very upset...',
+  'Please, think again!',
+  'Don\'t say no!',
+  'You\'ll break my heart...',
+  'Last request! 🙏',
 ];
 
 const HEART_EMOJIS = ['❤️', '💕', '💖', '💗', '💓', '💝'];
 
-// Secret key for token validation (must match admin page)
-const SECRET_KEY = 'valentine-secret-2024';
-
-// Simple hash function to generate a token (must match admin page)
-const generateToken = (name: string): string => {
-  let hash = 0;
-  const str = name + SECRET_KEY;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16);
-};
-
-// Helper function to check if URL has name parameter
-const hasNameParameter = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  const params = new URLSearchParams(window.location.search);
-  return !!(params.get('name') || params.get('Name') || params.get('NAME') || 
-    Array.from(params.entries()).some(([key]) => key.toLowerCase() === 'name'));
-};
-
-// Helper function to get and validate name from URL
-// Returns null if no name, throws error if invalid token
-const getNameFromURL = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  const params = new URLSearchParams(window.location.search);
-  
-  // Try different case variations: 'name', 'Name', 'NAME'
-  let nameParam = params.get('name') || params.get('Name') || params.get('NAME');
-  
-  // If not found, iterate through all params to find case-insensitive match
-  if (!nameParam) {
-    for (const [key, value] of params.entries()) {
-      if (key.toLowerCase() === 'name') {
-        nameParam = value;
-        break;
-      }
-    }
-  }
-  
-  // If no name parameter, return null (valid - will use default)
-  if (!nameParam) {
-    return null;
-  }
-  
-  // Name parameter exists - must have valid token
-  const token = params.get('token') || params.get('Token') || params.get('TOKEN');
-  
-  // If no token found, try case-insensitive search
-  let foundToken = token;
-  if (!foundToken) {
-    for (const [key, value] of params.entries()) {
-      if (key.toLowerCase() === 'token') {
-        foundToken = value;
-        break;
-      }
-    }
-  }
-  
-  // Validate token matches the name
-  const expectedToken = generateToken(nameParam);
-  if (!foundToken || foundToken !== expectedToken) {
-    // Invalid or missing token - should show 404
-    throw new Error('INVALID_TOKEN');
-  }
-  
-  return nameParam;
-};
-
-export default function Home() {
-  const [name, setName] = useState<string>('');
-  const [show404, setShow404] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isLoadingName, setIsLoadingName] = useState<boolean>(true);
+export default function BaileyPage() {
+  const name = 'Bailey';
   const [state, setState] = useState<AppState>({
     accepted: false,
     noButtonClicks: 0,
@@ -124,48 +50,6 @@ export default function Home() {
   const heartIdRef = useRef(0);
 
   useEffect(() => {
-    // Validate and load page content
-    if (typeof window !== 'undefined') {
-      const hasName = hasNameParameter();
-      
-      if (hasName) {
-        try {
-          const urlName = getNameFromURL();
-          if (urlName) {
-            setName(urlName);
-          }
-          setShow404(false);
-          // Brief loading animation for visual feedback
-          const timer = setTimeout(() => {
-            setIsLoading(false);
-            setIsLoadingName(false);
-          }, 500);
-          return () => clearTimeout(timer);
-        } catch {
-          // Invalid token - show 404
-          const timer = setTimeout(() => {
-            setShow404(true);
-            setIsLoading(false);
-          }, 500);
-          return () => clearTimeout(timer);
-        }
-      } else {
-        // No name parameter - show 404 (block empty index page)
-        const timer = setTimeout(() => {
-          setShow404(true);
-          setIsLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
-    }
-    
-    // Fallback for SSR
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setIsLoadingName(false);
-    }, 500);
-    return () => clearTimeout(timer);
-
     // Create floating hearts
     const createHeart = () => {
       const newHeart: Heart = {
@@ -244,55 +128,6 @@ export default function Home() {
     return NO_BUTTON_TEXTS[index];
   };
 
-  // Show loading animation while validating
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4">
-        <div className="flex flex-col items-center justify-center gap-6 text-center">
-          <div className="text-8xl animate-bounce">❤️</div>
-          <div className="text-2xl font-bold text-[#b91c1c] animate-pulse">
-            Зареждане...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show 404 page if invalid token
-  if (show404) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4 relative">
-        <div className="flex flex-col items-center justify-center gap-6 text-center">
-          <div className="text-8xl">💔</div>
-          <h1 className="text-6xl font-bold text-[#b91c1c]">404</h1>
-          <h2 className="text-3xl font-bold text-[#b91c1c]">Страницата не е намерена</h2>
-          <p className="text-lg text-[#b91c1c] opacity-80 max-w-md">
-            Извиняваме се, но тази страница не съществува или линкът е невалиден.
-          </p>
-          <a
-            href="/"
-            className="mt-4 px-6 py-3 bg-[#b91c1c] hover:bg-[#991b1b] text-white font-bold rounded-lg transition-all duration-200"
-          >
-            Назад към главната страница
-          </a>
-        </div>
-        <footer className="absolute bottom-4 left-0 right-0 text-center text-[#b91c1c] text-sm">
-          <span>❤️ </span>
-          <a 
-            href="https://hmwspro.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="hover:underline"
-            title="HM WSPro"
-          >
-            HM WSPro
-          </a>
-          <span> ❤️</span>
-        </footer>
-      </div>
-    );
-  }
-
   if (state.accepted) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-[#fff5f5] px-4 relative">
@@ -317,8 +152,7 @@ export default function Home() {
               }}
             />
           </div>
-          <h2 className="text-4xl font-bold text-[#b91c1c]">Йей! Знаех си! ❤️</h2>
-          <p className="text-3xl font-bold text-[#b91c1c]">Обичам те!</p>
+          <h2 className="text-4xl font-bold text-[#b91c1c]">Yes! I knew it! ❤️</h2>
         </div>
         <footer className="absolute bottom-4 left-0 right-0 text-center text-[#b91c1c] text-sm">
           <span>❤️ </span>
@@ -329,7 +163,7 @@ export default function Home() {
             className="hover:underline"
             title="HM WSPro"
           >
-            hmwspro.com
+            HM WSPro
           </a>
           <span> ❤️</span>
         </footer>
@@ -359,16 +193,8 @@ export default function Home() {
       </div>
       
       <div className="flex flex-col items-center justify-center gap-8 text-center z-10 max-w-md w-full">
-        <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold text-[#b91c1c] leading-tight transition-opacity duration-300 ${isLoadingName ? 'opacity-0' : 'opacity-100'}`}>
-          {isLoadingName ? (
-            <span className="inline-flex items-center gap-2 animate-pulse">
-              <span className="opacity-70">Зареждане...</span>
-            </span>
-          ) : (
-            <>
-              {name}, ще бъдеш ли моята Валентинка? 🌹
-            </>
-          )}
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#b91c1c] leading-tight">
+          {name}, will you be my Valentine? 🌹
         </h1>
         
         <div className="w-48 h-48 sm:w-64 sm:h-64 bg-contain bg-center bg-no-repeat">
@@ -389,7 +215,7 @@ export default function Home() {
               maxWidth: '45%',
             }}
           >
-            Да
+            Yes
           </button>
           
           <button
